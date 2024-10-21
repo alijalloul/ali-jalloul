@@ -17,13 +17,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="min-h-screen">
+        <div className="min-h-screen flex flex-col">
           <Header />
 
-          <div className="flex justify-between items-center">
-            <Nav className="w-1/3" />
+          <div className="flex-1 flex justify-center items-center ">
+            <div className="w-[90%] h-full flex justify-between items-center border">
+              <Nav className="w-1/3" />
 
-            {children}
+              {children}
+            </div>
           </div>
         </div>
 

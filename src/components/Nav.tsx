@@ -1,60 +1,83 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const Nav = ({ className }: { className: string }) => {
-  const buttons = [
-    "Contact Me",
-    "Home",
-    "Projects",
-    "Experience",
-    "Contact Me",
-    "Contact Me",
-    "Home",
-  ];
+  const buttons = ["Home", "Projects", "Experience", "Contact Me"];
+  const buttonsArr = [buttons[buttons.length - 1]]
+    .concat(buttons)
+    .concat(buttons[0]);
 
-  // Step 1: State to track the selected button index
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(1);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [buttonTop, setButtonTop] = useState(0);
+  const router = useRouter();
 
-  // Step 2: Effect to scroll the selected button into view
   useEffect(() => {
     if (containerRef.current) {
       const buttonHeight = containerRef.current.clientHeight / 3;
-      const scrollToPosition = buttonHeight * (selectedButtonIndex - 1); // Calculate scroll position
-      containerRef.current.scrollTo({
-        top: scrollToPosition,
-        behavior: "smooth", // Smooth scrolling
-      });
+      setButtonTop(buttonHeight);
     }
-  }, [selectedButtonIndex, buttons.length]);
+  }, [selectedButtonIndex]);
 
-  // Step 3: Scroll event handler
+  useEffect(() => {
+    const route = buttons[selectedButtonIndex - 1].toLowerCase();
+    if (
+      selectedButtonIndex > 0 &&
+      selectedButtonIndex < buttonsArr.length - 1
+    ) {
+      router.push(
+        `/${route === "contact me" ? "contact" : route === "home" ? "" : route}`
+      );
+    }
+  }, [selectedButtonIndex, router]);
+
   const handleScroll = (event: React.WheelEvent<HTMLDivElement>) => {
-    const delta = event.deltaY; // Check scroll direction
-    if (delta > 0 && selectedButtonIndex < buttons.length - 1) {
-      setSelectedButtonIndex((prev) => Math.min(prev + 1, buttons.length - 1));
+    const delta = event.deltaY;
+    if (delta > 0 && selectedButtonIndex < buttonsArr.length - 1) {
+      setSelectedButtonIndex((prev) =>
+        Math.min(prev + 1, buttonsArr.length - 1)
+      );
     } else if (delta < 0 && selectedButtonIndex > 0) {
       setSelectedButtonIndex((prev) => Math.max(prev - 1, 0));
     }
+
+    if (delta > 0 && selectedButtonIndex === buttonsArr.length - 2) {
+      setSelectedButtonIndex(1);
+    } else if (delta < 0 && selectedButtonIndex - 1 === 0) {
+      setSelectedButtonIndex(buttonsArr.length - 2);
+    }
   };
+
+  function handleClick(index: number) {
+    setSelectedButtonIndex(
+      index === buttonsArr.length - 1
+        ? 1
+        : index === 0
+        ? buttonsArr.length - 2
+        : index
+    );
+  }
 
   return (
     <div className={className}>
       <div
         ref={containerRef}
-        className="flex flex-col h-96 overflow-y-scroll no-scrollbar"
-        onWheel={handleScroll} // Step 4: Add wheel event listener
+        className="relative items-center h-96 overflow-hidden"
+        onWheel={handleScroll}
       >
-        {buttons.map((button, index) => (
-          <div key={index} className="flex-none basis-1/3 flex justify-center ">
+        {buttonsArr.map((button, index) => (
+          <div
+            key={index}
+            className="absolute w-full h-1/3 flex justify-center transition-all duration-300 ease-in-out"
+            style={{ top: buttonTop * (1 + index - selectedButtonIndex) }}
+          >
             <button
-              className={` text-7xl text-black opacity-100 transition-all duration-300 ease-in-out drop-shadow-2xl ${
+              className={`text-7xl text-black opacity-100 transition-all duration-300 ease-in-out drop-shadow-2xl ${
                 selectedButtonIndex !== index && "!text-4xl opacity-80"
-              } `}
-              onClick={() => {
-                setSelectedButtonIndex(index);
-              }}
+              }`}
+              onClick={() => handleClick(index)}
             >
               {button}
             </button>
