@@ -64,7 +64,7 @@ const Nav = ({ className }: { className: string }) => {
     <div className={className}>
       <div
         ref={containerRef}
-        className="relative items-center h-96 overflow-hidden"
+        className="relative w-full h-96 overflow-hidden"
         onWheel={handleScroll}
       >
         {buttonsArr.map((button, index) => (
